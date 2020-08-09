@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import UserNotifications
 
 protocol AddBirthdayViewControllerDelegate: class {
   func addBirthday(didAddBirthday birthday: Birthday, from addBirthdayVievController: AddBirthdayViewController)
@@ -50,6 +51,22 @@ class AddBirthdayViewController: UIViewController {
       //сохранение в бд
       try context.save()
       delegate?.addBirthday(didAddBirthday: newBirthdayObject, from: self)
+      //notification
+      let message = "Сегодня \(firstName) \(lastName) празднует день рождения!"
+      let content = UNMutableNotificationContent()
+      content.body = message
+      content.sound = .default
+      
+      var dateComponents = Calendar.current.dateComponents([.month, .day], from: birthdate)
+      dateComponents.hour = 10
+      dateComponents.minute = 57
+      let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+      if let identifier = newBirthdayObject.birthdayId {
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        let center = UNUserNotificationCenter.current()
+        center.add(request, withCompletionHandler: nil)
+        
+      }
     }
     catch let error as NSError {
       print(error.localizedDescription)

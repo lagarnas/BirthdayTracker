@@ -8,6 +8,7 @@
 
 import UIKit
 import  CoreData
+import UserNotifications
 
 class BirthdaysTableViewController: UITableViewController {
   
@@ -22,7 +23,6 @@ class BirthdaysTableViewController: UITableViewController {
     //запрос на получение данных из бд
     let fetchRequest: NSFetchRequest<Birthday> = Birthday.fetchRequest()
     //or
-    // let fetchRequest = Birthday.fetchRequest() as NSFetchRequest<Birthday>
     
     //Сортировка дней рождения
     let sortDescriptor1 = NSSortDescriptor(key: "lastName", ascending: true) //по возврастанию от А до Я
@@ -82,6 +82,10 @@ class BirthdaysTableViewController: UITableViewController {
     
     if birthdays.count > indexPath.row {
       let birthday = birthdays[indexPath.row]
+      if let identifier = birthday.birthdayId {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+      }
       let context = CoreDataStack.shared.persistentContainer.viewContext
       context.delete(birthday)
       birthdays.remove(at: indexPath.row)
